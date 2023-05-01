@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Plagiarism Checker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Plagiarism Checker</h1>
+    <form>
+      <label for="text-input">Enter text:</label><br />
+      <textarea id="text-input" name="text" rows="10" cols="50"></textarea
+      ><br /><br />
+      <button type="button" onclick="checkPlagiarism()">
+        Check Plagiarism
+      </button>
+    </form>
+    <!-- <script
+      async
+      src="https://cse.google.com/cse.js?cx=a59683138defe4610"
+    ></script> -->
+    <div class="container">
+      <h2>Top 10 results:</h2>
+      <div class="gcse-search"></div>
+    </div>
+    <div class="percent-match">
+      <h2>0%</h2>
+      <h3>Percent match</h3>
+    </div>
+
+    <script>
+      const percent = document.querySelector(".percent-match h2");
+      const searchRes = document.querySelector(".gcse-search");
+      const apiKey = " AIzaSyBC3IHnYbaYpme_UdS3Sr6LAMgqzu0p_XQ ";
+      const cx = "a59683138defe4610";
+      const query = document.getElementById("text-input").value;
+      const num = 100;
+      const container = document.querySelector(".container");
+
+      const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${cx}&q=${query}`;
+      let sum = 0,
+        c = 0;
+      function checkPlagiarism() {
+        c++;
+        searchRes.innerHTML = "";
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+
+            let sum = 0.0;
+            for (let index = 0; index < data.items.length; index++) {
+              sum += parseInt(
+                calculatePercentMatch(query, data.items[0].title)
+              );
+              // searchRes.innerHTML = data.items[2].title+"<br>";
+              console.log(data.items[index].title);
+              searchRes.innerHTML += data.items[index].title + "<br>";
+              console.log(
+                calculatePercentMatch(query, data.items[index].title)
+              );
+
+              // sum=sum+calculatePercentMatch(query,data.items[index].title);
+            }
+            let result = (sum / 10 - Math.random()).toFixed(1);
+            if (result < 50.0) {
+              document.querySelector(".percent-match").style.color = "green";
+            } else if (result >= 50.0 && result <= 75) {
+              document.querySelector(".percent-match").style.color = "yellow";
+            } else {
+              document.querySelector(".percent-match").style.color = "red";
+            }
+            percent.innerHTML = (sum / 10 - Math.random()).toFixed(1) + "%";
+            console.log("Sum is : " + sum);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+        console.log(c);
+        if (c > 1) {
+          location.reload();
+          c = 1;
+        }
+      }
+
+      function calculatePercentMatch(searchQuery, searchResult) {
+        searchQuery = searchQuery.toUpperCase();
+        searchResult = searchResult.toUpperCase();
+        const searchQueryWords = searchQuery.split(" ");
+        let matches = 0;
+        searchQueryWords.forEach((word) => {
+          if (searchResult.includes(word)) {
+            matches++;
+          }
+        });
+        const percentMatch = (matches / searchQueryWords.length) * 100;
+        return percentMatch.toFixed(2);
+      }
+    </script>
+  </body>
+</html>
